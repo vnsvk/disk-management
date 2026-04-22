@@ -398,15 +398,11 @@ HTML = """<!doctype html>
                 <button id="csvBtn" class="export">Export CSV</button>
               </div>
               <div class="action-group">
-                <button id="selectAllMigrationBtn" class="secondary">Select All V1</button>
                 <label class="checkbox-card"><input id="backupBeforeMigration" type="checkbox"> Backup Before Migration</label>
                 <button id="backupSelectedBtn" class="secondary">Backup Selected</button>
                 <button id="migrateSelectedBtn" class="secondary">Migrate Selected</button>
               </div>
               <div class="action-group">
-                <button id="selectAllUnattachedBtn" class="secondary">Select All</button>
-                <button id="clearUnattachedBtn" class="secondary">Clear</button>
-                <button id="openSelectedBtn" class="secondary">Open Selected</button>
                 <button id="deleteSelectedBtn" class="secondary">Delete Selected</button>
               </div>
             </div>
@@ -708,21 +704,6 @@ HTML = """<!doctype html>
       URL.revokeObjectURL(url);
     }
 
-    function openPortalUrls(rows) {
-      if (!state.data) {
-        showNotice("Load a subscription first.", true);
-        return;
-      }
-      const urls = [...new Set(rows.map(row => row.portalUrl).filter(Boolean))];
-      if (urls.length === 0) {
-        showNotice("No portal links available for this selection.", true);
-        return;
-      }
-      for (const url of urls) {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
-    }
-
     function escapeCsv(value) {
       const text = value == null ? "" : String(value);
       if (/[",\\n]/.test(text)) {
@@ -787,35 +768,6 @@ HTML = """<!doctype html>
           migrationMetaEl.textContent = `${state.selectedMigrationDiskIds.size} of ${state.data.migrationPlan.filter(item => item.eligible).length} migration disks selected`;
         });
       }
-    }
-
-    function selectAllMigration() {
-      if (!state.data) {
-        showNotice("Load a subscription first.", true);
-        return;
-      }
-      state.selectedMigrationDiskIds = new Set(state.data.migrationPlan.filter(row => row.eligible).map(row => row.id));
-      renderData(state.data);
-    }
-
-    function selectAllUnattached() {
-      if (!state.data) {
-        showNotice("Load a subscription first.", true);
-        return;
-      }
-      state.selectedUnattachedDiskIds = new Set(state.data.unattached.map(row => row.id));
-      renderData(state.data);
-    }
-
-    function clearUnattachedSelection() {
-      state.selectedUnattachedDiskIds = new Set();
-      if (state.data) {
-        renderData(state.data);
-      }
-    }
-
-    function openSelectedUnattached() {
-      openPortalUrls(getSelectedUnattachedRows());
     }
 
     async function deleteSelectedUnattached() {
@@ -932,12 +884,8 @@ HTML = """<!doctype html>
 
     document.getElementById("loadBtn").addEventListener("click", loadInventory);
     document.getElementById("csvBtn").addEventListener("click", exportInventoryCsv);
-    document.getElementById("selectAllMigrationBtn").addEventListener("click", selectAllMigration);
     document.getElementById("backupSelectedBtn").addEventListener("click", backupSelectedMigration);
     document.getElementById("migrateSelectedBtn").addEventListener("click", migrateSelectedDisks);
-    document.getElementById("selectAllUnattachedBtn").addEventListener("click", selectAllUnattached);
-    document.getElementById("clearUnattachedBtn").addEventListener("click", clearUnattachedSelection);
-    document.getElementById("openSelectedBtn").addEventListener("click", openSelectedUnattached);
     document.getElementById("deleteSelectedBtn").addEventListener("click", deleteSelectedUnattached);
     navButtons.all.addEventListener("click", () => setActiveView("all"));
     navButtons.eligible.addEventListener("click", () => setActiveView("eligible"));
